@@ -1,6 +1,7 @@
 import os
 
-from flask import Flask
+from flask import Flask, render_template
+from flask_migrate import Migrate
 
 
 def create_app(test_config=None):
@@ -13,5 +14,14 @@ def create_app(test_config=None):
         app.config.from_pyfile('config.py', silent=True)
     else:
         app.config.from_mapping(test_config)
+
+    from .models import db
+
+    db.init_app(app)
+    migrate = Migrate(app, db)
+
+    @app.route('/sign_up')
+    def sign_up():
+        return render_template('sign_up.html')
 
     return app
