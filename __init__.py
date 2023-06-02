@@ -1,5 +1,6 @@
 import os
 import functools
+import dotenv
 
 from flask import Flask, render_template, redirect, url_for, request, flash, session, g
 from flask_migrate import Migrate
@@ -7,6 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 
 def create_app(test_config=None):
+    dotenv.load_dotenv()
     app = Flask(__name__)
     app.config.from_mapping(
         SECRET_KEY=os.environ.get('SECRET_KEY', default='dev')

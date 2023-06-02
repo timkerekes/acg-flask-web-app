@@ -9,6 +9,7 @@ psycopg2-binary = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
 mistune = "*"
+python-dotenv = "*"
 
 [dev-packages]
 python-dotenv = "*"
