@@ -23,6 +23,6 @@ jobs:
         logout: true
         
     - name: Docker Build & Push
-      run: 
+      run: |
         docker build -t ${{ secrets.HUB_USERNAME }}/acg-flask-web-app:${{ github.sha }} .
         docker push ${{ secrets.HUB_URL }}/acg-flask-web-app:${{ github.sha }}
