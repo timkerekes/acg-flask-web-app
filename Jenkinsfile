@@ -10,7 +10,7 @@ pipeline {
             }
             steps {
                 script {
-                    app = docker.build(DOCKER_IMAGE_NAME)
+                    docker compose build(DOCKER_IMAGE_NAME)
                 }
             }
         }
@@ -23,6 +23,16 @@ pipeline {
                     docker.withRegistry('https://registry.hub.docker.com', 'docker_hub') {
                         app.push("${env.BUILD_NUMBER}")
                         app.push("latest")
+                    }
+                }
+            }
+        }
+        stage('Pull Image') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker_hub') {
+                        app.pull("${env.BUILD_NUMBER}")
+
                     }
                 }
             }

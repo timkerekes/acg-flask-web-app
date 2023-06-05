@@ -19,6 +19,7 @@ services:
 
   webapp:
     build: .
+    image: timkerekes/acg-flask-web-app:latest
     depends_on: [db]
     environment:
       - DEBUG=False
