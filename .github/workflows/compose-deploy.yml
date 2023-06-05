@@ -13,7 +13,7 @@ jobs:
 
     - name: Copy Keys
       run: |
-        whoami
+        ssh-copy-id -i ${{ secrest.PUBLIC_KEY }} runner@localhost
     
     - name: Create env file
       run: |
