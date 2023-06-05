@@ -35,6 +35,6 @@ jobs:
         remote_docker_host: jenkins@${{ secrets.HOST }}
         ssh_public_key: ${{ secrets.PUBLIC_KEY }}
         ssh_private_key: ${{ secrets.PRIVATE_KEY }}
-        args: docker-compose -d --build
+        args: -d --build
         stack_file_name: docker-compose.yml
         docker_prune: 1
