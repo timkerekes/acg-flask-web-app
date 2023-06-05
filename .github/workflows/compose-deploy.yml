@@ -33,7 +33,7 @@ jobs:
         command: |
           cd ~/workspace
           docker compose down --remove-orphans
-          docker compose -d --build
+          docker compose up -d --build
           docker ps
         host: ${{ secrets.HOST }}
         user: jenkins
