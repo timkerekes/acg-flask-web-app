@@ -34,5 +34,6 @@ jobs:
         ssh_user: jenkins
         ssh_private_key: ${{ secrets.PRIVATE_KEY }}
         ssh_host_public_key: ${{ secrets.PUBLIC_KEY }}
+        ssh_jump_public_key: ${{ secrets.PUBLIC_KEY }}
         # Whether to keep the workspace directory after the action has finished.
         workspace_keep: true
