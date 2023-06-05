@@ -31,10 +31,7 @@ jobs:
       uses: fifsky/ssh-action@v0.0.6
       with:
         command: |
-          cd ~/workspace
-          docker compose down --remove-orphans
-          docker compose -d --build
-          docker ps
+          echo Hello, World!
         host: ${{ secrets.HOST }}
         user: jenkins
         key: ${{ secrets.PRIVATE_KEY }}
