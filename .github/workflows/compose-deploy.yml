@@ -50,3 +50,15 @@ jobs:
         user: jenkins
         key: ${{ secrets.PRIVATE_KEY }}
         args: -tt
+
+    - name: Flask DB Migrate & Upgrade
+      uses: fifsky/ssh-action@v0.0.6
+      with:
+        command: |
+          flask db init
+          flask db migrate
+          flask db upgrade
+        host: ${{ secrets.HOST }}
+        user: jenkins
+        key: ${{ secrets.PRIVATE_KEY }}
+        args: -tt

@@ -14,6 +14,6 @@ COPY . .
 
 ENV FLASK_APP=__init__.py
 
-EXPOSE 5000
+EXPOSE 80
 
-CMD ["flask", "run", "--host=0.0.0.0"] && ["flask", "db", "init"] && ["flask", "db", "migrate"] && ["flask", "db", "upgrade"]
+CMD ["flask", "run", "--host=0.0.0.0"]
