@@ -17,16 +17,6 @@ jobs:
         touch .env
         echo "${{ secrets.SERVER_ENV_PROD }}" > .env
     
-    - name: SCP Upload
-      uses: betanzos/scp-upload@v1
-      with:
-        source: /home/runner/work/acg-flask-web-app/acg-flask-web-app
-        host: ${{ secrets.HOST }}
-        username: jenkins
-        key: ${{ secrets.PRIVATE_KEY }}
-        remote_dir: ~/workspace
-        recursive: true
-    
     - name: Docker Compose Remote (SSH) Deploy
       # You may pin to the exact commit or the version.
       # uses: astappiev/docker-compose-remote-action@bb66957c40b1d26317a6b48d1bd8aeb7e465f324
