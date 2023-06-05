@@ -10,6 +10,10 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
+
+    - name: Copy Keys
+      run: |
+        whoami
     
     - name: Create env file
       run: |
@@ -30,7 +34,7 @@ jobs:
     - name: Run Docker Compose Up (SSH)
       run: |
         ssh jenkins@${{ secrets.HOST }}
-        cd ~/workspace
+        cd ~/workspace/workspace
         docker compose down --remove-orphans
         docker compose -d --build
         docker ps
