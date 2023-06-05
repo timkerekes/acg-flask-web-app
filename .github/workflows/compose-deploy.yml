@@ -38,7 +38,7 @@ jobs:
         ssh_jump_host: # optional
         ssh_private_key: ${{ secrets.PRIVATE_KEY }}
         ssh_host_public_key: ${{ secrets.PUBLIC_KEY }}
-        ssh_jump_public_key: ${{ secrets.PUBLIC_KEY }}
+        ssh_jump_public_key: # optional
         docker_compose_filename: # optional
         docker_compose_prefix: # optional
         docker_args: # optional, default is -d --remove-orphans --build
