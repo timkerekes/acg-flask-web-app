@@ -10,18 +10,17 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
-      with:
-        path: app
     
     - name: Create env file
       run: |
+        cd /home/runner/work/acg-flask-web-app/acg-flask-web-app
         touch .env
         echo "${{ secrets.SERVER_ENV_PROD }}" > .env
     
     - name: SCP Upload
       uses: betanzos/scp-upload@v1
       with:
-        source: ~/app
+        source: /home/runner/work/acg-flask-web-app/acg-flask-web-app
         host: ${{ secrets.HOST }}
         username: jenkins
         key: ${{ secrets.PRIVATE_KEY }}
