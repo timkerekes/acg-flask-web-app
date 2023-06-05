@@ -24,16 +24,15 @@ jobs:
         host: ${{ secrets.HOST }}
         username: jenkins
         key: ${{ secrets.PRIVATE_KEY }}
-        remote_dir: ~/docker-deployment
+        remote_dir: ~/workspace
         recursive: true
     
-    - name: Docker-compose Deployment
-      uses: Autom3/docker-deployment-action@3.0.1
+    - name: Docker Compose Remote (SSH) Deploy
+      uses: astappiev/docker-compose-remote-action@v1
       with:
-        # Remote Docker host ie (user@host)
-        remote_docker_host: jenkins@${{ secrets.HOST }}
-        ssh_public_key: ${{ secrets.PUBLIC_KEY }}
+        ssh_host: ${{ secrets.HOST }}
+        ssh_user: jenkins
         ssh_private_key: ${{ secrets.PRIVATE_KEY }}
-        args: -d --build
-        stack_file_name: docker-compose.yml
-        docker_prune: 1
+        ssh_host_public_key: ${{ secrets.PUBLIC_KEY }}
+        # Whether to keep the workspace directory after the action has finished.
+        workspace_keep: true
