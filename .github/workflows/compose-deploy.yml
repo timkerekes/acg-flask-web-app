@@ -31,7 +31,7 @@ jobs:
       uses: fifsky/ssh-action@v0.0.6
       with:
         command: |
-          cd ~/workspace/workspace
+          cd ~/workspace
           docker compose down --remove-orphans
           docker compose -d --build
           docker ps
