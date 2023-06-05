@@ -10,10 +10,6 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
-
-    - name: Copy Keys
-      run: |
-        ssh-copy-id -i ${{ secrets.PUBLIC_KEY }} runner@localhost
     
     - name: Create env file
       run: |
@@ -28,14 +24,17 @@ jobs:
         host: ${{ secrets.HOST }}
         username: jenkins
         key: ${{ secrets.PRIVATE_KEY }}
-        remote_dir: ~/workspace
+        remote_dir: ~
         recursive: true
-    
-    - name: Run Docker Compose Up (SSH)
-      run: |
-        ssh jenkins@${{ secrets.HOST }}
-        cd ~/workspace/workspace
-        docker compose down --remove-orphans
-        docker compose -d --build
-        docker ps
 
+    - name: Run Docker Compose Up
+      uses: fifsky/ssh-action@v0.0.6
+      with:
+        command: |
+          cd ~/workspace/workspace
+          docker compose down --remove-orphans
+          docker compose -d --build
+          docker ps
+        host: ${{ secrets.HOST }}
+        user: jenkins
+        key: ${{ secrets.PRIVATE_KEY }}
