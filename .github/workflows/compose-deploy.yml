@@ -2,7 +2,7 @@ name: Docker Compose Deploy
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
 
 jobs:
   deploy:
@@ -10,11 +10,23 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
+      with:
+        path: app
     
     - name: Create env file
       run: |
         touch .env
         echo "${{ secrets.SERVER_ENV_PROD }}" > .env
+    
+    - name: SCP Upload
+      uses: betanzos/scp-upload@v1
+      with:
+        source: ~/app
+        host: ${{ secrets.HOST }}
+        username: jenkins
+        key: ${{ secrets.PRIVATE_KEY }}
+        remote_dir: ~/docker-deployment
+        recursive: true
     
     - name: Docker-compose Deployment
       uses: Autom3/docker-deployment-action@3.0.1
@@ -23,6 +35,6 @@ jobs:
         remote_docker_host: jenkins@${{ secrets.HOST }}
         ssh_public_key: ${{ secrets.PUBLIC_KEY }}
         ssh_private_key: ${{ secrets.PRIVATE_KEY }}
-        args: docker compose up -d --build
+        args: docker compose
         stack_file_name: docker-compose.yml
         docker_prune: 1
