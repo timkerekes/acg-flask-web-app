@@ -16,6 +16,17 @@ jobs:
         cd /home/runner/work/acg-flask-web-app/acg-flask-web-app
         touch .env
         echo "${{ secrets.SERVER_ENV_PROD }}" > .env
+
+    - name: Remove Workspace Folder
+      uses: fifsky/ssh-action@v0.0.6
+      with:
+        command: |
+          cd ~
+          rm -rf workspace
+        host: ${{ secrets.HOST }}
+        user: jenkins
+        key: ${{ secrets.PRIVATE_KEY }}
+        args: -tt
     
     - name: SCP Upload
       uses: betanzos/scp-upload@v1
