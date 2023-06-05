@@ -21,6 +21,11 @@ jobs:
         username: ${{ secrets.HUB_USERNAME }}
         password: ${{ secrets.HUB_PASSWORD }}
         logout: true
+    
+    - name: Create env file
+      run: |
+        touch .env
+        echo "${{ secrets.SERVER_ENV_PROD }}" > .env
         
     - name: Docker Build & Push
       run: |
