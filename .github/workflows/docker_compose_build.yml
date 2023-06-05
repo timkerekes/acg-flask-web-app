@@ -29,5 +29,5 @@ jobs:
         
     - name: Docker Build & Push
       run: |
-        docker compose build ${{ secrets.HUB_USERNAME }}/acg-flask-web-app:${{ github.sha }} .
-        docker compose push ${{ secrets.HUB_URL }}/acg-flask-web-app:${{ github.sha }}
+        docker compose build
+        docker compose push
