@@ -28,12 +28,25 @@ jobs:
         recursive: true
     
     - name: Docker Compose Remote (SSH) Deploy
+      # You may pin to the exact commit or the version.
+      # uses: astappiev/docker-compose-remote-action@bb66957c40b1d26317a6b48d1bd8aeb7e465f324
       uses: astappiev/docker-compose-remote-action@v1
       with:
         ssh_host: ${{ secrets.HOST }}
+        ssh_port: # optional
         ssh_user: jenkins
+        ssh_jump_host: # optional
         ssh_private_key: ${{ secrets.PRIVATE_KEY }}
         ssh_host_public_key: ${{ secrets.PUBLIC_KEY }}
         ssh_jump_public_key: ${{ secrets.PUBLIC_KEY }}
+        docker_compose_filename: # optional
+        docker_compose_prefix: # optional
+        docker_args: # optional, default is -d --remove-orphans --build
+        docker_use_stack: # optional, default is false
+        docker_env: # optional
+        workspace: # optional, default is workspace
         # Whether to keep the workspace directory after the action has finished.
         workspace_keep: true
+        container_registry: # optional
+        container_registry_username: # optional
+        container_registry_password: # optional
