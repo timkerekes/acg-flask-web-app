@@ -20,7 +20,7 @@ jobs:
       uses: Autom3/docker-deployment-action@3.0.1
       with:
         # Remote Docker host ie (user@host)
-        remote_docker_host: ${{ secrets.HOST }}
+        remote_docker_host: jenkins@${{ secrets.HOST }}
         ssh_public_key: ${{ secrets.PUBLIC_KEY }}
         ssh_private_key: ${{ secrets.PRIVATE_KEY }}
         args: docker compose up -d --build

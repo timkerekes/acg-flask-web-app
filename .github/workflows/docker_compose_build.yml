@@ -1,10 +1,10 @@
-name: Docker Build Image CI
+name: Docker COmpose Build & Push
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "main" ]
 
 jobs:
 
@@ -21,8 +21,13 @@ jobs:
         username: ${{ secrets.HUB_USERNAME }}
         password: ${{ secrets.HUB_PASSWORD }}
         logout: true
+    
+    - name: Create env file
+      run: |
+        touch .env
+        echo "${{ secrets.SERVER_ENV_PROD }}" > .env
         
     - name: Docker Build & Push
       run: |
-        docker build -t ${{ secrets.HUB_USERNAME }}/acg-flask-web-app:${{ github.sha }} .
-        docker push ${{ secrets.HUB_URL }}/acg-flask-web-app:${{ github.sha }}
+        docker compose build
+        docker compose push
