@@ -1,19 +1,22 @@
 # Set the base image
 FROM python:3.9-alpine
 
+ENV PYBASE /pybase
+ENV PYTHONUSERBASE $PYBASE
+ENV PATH $PYBASE/bin:$PATH
+
+RUN pip install pipenv
+
+WORKDIR /tmp
+
+COPY Pipfile .
+RUN pipenv lock
+RUN PIP_USER=1 PIP_IGNORE_INSTALLED=1 pipenv install -d --system --ignore-pipfile
+
 WORKDIR /app
-
-RUN pip install --no-cache-dir pipenv
-RUN pip install python-dotenv
-
-COPY Pipfile Pipfile.lock ./
-
-RUN pipenv install --system --deploy --ignore-pipfile
 
 COPY . .
 
-ENV FLASK_APP=__init__.py
-
 EXPOSE 80
 
-CMD ["flask", "run", "--host=0.0.0.0", "-p 80"]
+CMD ["gunicorn", "-b 0.0.0.0:80", "notes:create_app()"]
