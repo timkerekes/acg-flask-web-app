@@ -1,5 +1,5 @@
 # Set the base image
-FROM python:3.9-alpine
+FROM python:alpine3.17
 
 ENV PYBASE /pybase
 ENV PYTHONUSERBASE $PYBASE
