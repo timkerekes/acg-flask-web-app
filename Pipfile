@@ -15,4 +15,3 @@ gunicorn = "*"
 python-dotenv = "*"
 
 [requires]
-python_version = "2.7"
