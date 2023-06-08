@@ -59,7 +59,7 @@ jobs:
       uses: fifsky/ssh-action@v0.0.6
       with:
         command: |
-          cd ~/app/notes
+          cd notes
           docker exec workspace-webapp-1 /bin/sh -c 'flask db init'
           docker exec workspace-webapp-1 /bin/sh -c 'flask db migrate'
           docker exec workspace-webapp-1 /bin/sh -c 'flask db upgrade'
