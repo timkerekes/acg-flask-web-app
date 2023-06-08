@@ -13,9 +13,9 @@ COPY Pipfile .
 RUN pipenv lock
 RUN PIP_USER=1 PIP_IGNORE_INSTALLED=1 pipenv install -d --system --ignore-pipfile
 
-WORKDIR /app
+COPY . /app/notes
 
-COPY . .
+WORKDIR /app
 
 EXPOSE 80
 
