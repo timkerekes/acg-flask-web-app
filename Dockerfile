@@ -17,6 +17,8 @@ COPY . /app/notes
 
 WORKDIR /app
 
+ENV FLASK_APP=__init__.py
+
 EXPOSE 80
 
 CMD ["gunicorn", "-b 0.0.0.0:80", "notes:create_app()"]
