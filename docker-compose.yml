@@ -4,6 +4,7 @@ services:
 
   db:
       image: postgres:alpine3.18
+      restart: always
       volumes:
       - postgres_data:/var/lib/postgresql/data/
       ports:
@@ -20,6 +21,7 @@ services:
   webapp:
     build: .
     image: timkerekes/acg-flask-web-app
+    restart: always
     depends_on: [db]
     environment:
       - DEBUG=False
