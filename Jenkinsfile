@@ -1,3 +1,66 @@
+def dockerBuildAndPush() {
+    withCredentials([usernamePassword(credentialsId: 'HUB_CREDENTIALS_ID', usernameVariable: 'HUB_USERNAME', passwordVariable: 'HUB_PASSWORD')]) {
+        script {
+            docker.withRegistry('https://your-docker-registry-url') {
+                def imageName = "${env.HUB_USERNAME}/acg-flask-web-app:${env.GITHUB_SHA}"
+                docker.build(imageName, '.').push()
+            }
+        }
+    }
+}
+
+def createEnvFile() {
+    sh '''
+    cd /home/runner/work/acg-flask-web-app/acg-flask-web-app
+    touch .env
+    echo "${SERVER_ENV_PROD}" > .env
+    '''
+}
+
+def removeWorkspaceFolder() {
+    sshagent(['PRIVATE_KEY_CREDENTIALS_ID']) {
+        sh '''
+        ssh jenkins@${HOST} -tt "cd ~ && rm -rf workspace"
+        '''
+    }
+}
+
+def scpUpload() {
+    script {
+        def sourceDir = "/home/runner/work/acg-flask-web-app/acg-flask-web-app"
+        def remoteDir = "~"
+
+        sshPublisher(
+            publishers: [sshPublisherDesc(
+                configName: 'SSH_SERVER_CONFIG_NAME',
+                transfers: [sshTransfer(
+                    source: sourceDir,
+                    destination: remoteDir,
+                    removePrefix: sourceDir
+                )]
+            )]
+        )
+    }
+}
+
+def runDockerComposeUp() {
+    sshagent(['PRIVATE_KEY_CREDENTIALS_ID']) {
+        sh '''
+        ssh jenkins@${HOST} -tt "cd ~/workspace && docker compose down --remove-orphans && docker compose up -d --build && docker ps"
+        '''
+    }
+}
+
+def flaskDBMigrateAndUpgrade() {
+    sshagent(['PRIVATE_KEY_CREDENTIALS_ID']) {
+        sh '''
+        ssh jenkins@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db init'"
+        ssh jenkins@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db migrate'"
+        ssh jenkins@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db upgrade'"
+        '''
+    }
+}
+
 pipeline {
     agent any
     stages {
@@ -35,69 +98,6 @@ pipeline {
                     flaskDBMigrateAndUpgrade()
                 }
             }
-        }
-    }
-    
-    def dockerBuildAndPush() {
-        withCredentials([usernamePassword(credentialsId: 'HUB_CREDENTIALS_ID', usernameVariable: 'HUB_USERNAME', passwordVariable: 'HUB_PASSWORD')]) {
-            script {
-                docker.withRegistry('https://your-docker-registry-url') {
-                    def imageName = "${env.HUB_USERNAME}/acg-flask-web-app:${env.GITHUB_SHA}"
-                    docker.build(imageName, '.').push()
-                }
-            }
-        }
-    }
-
-    def createEnvFile() {
-        sh '''
-        cd /home/runner/work/acg-flask-web-app/acg-flask-web-app
-        touch .env
-        echo "${SERVER_ENV_PROD}" > .env
-        '''
-    }
-
-    def removeWorkspaceFolder() {
-        sshagent(['PRIVATE_KEY_CREDENTIALS_ID']) {
-            sh '''
-            ssh jenkins@${HOST} -tt "cd ~ && rm -rf workspace"
-            '''
-        }
-    }
-
-    def scpUpload() {
-        script {
-            def sourceDir = "/home/runner/work/acg-flask-web-app/acg-flask-web-app"
-            def remoteDir = "~"
-
-            sshPublisher(
-                publishers: [sshPublisherDesc(
-                    configName: 'SSH_SERVER_CONFIG_NAME',
-                    transfers: [sshTransfer(
-                        source: sourceDir,
-                        destination: remoteDir,
-                        removePrefix: sourceDir
-                    )]
-                )]
-            )
-        }
-    }
-
-    def runDockerComposeUp() {
-        sshagent(['PRIVATE_KEY_CREDENTIALS_ID']) {
-            sh '''
-            ssh jenkins@${HOST} -tt "cd ~/workspace && docker compose down --remove-orphans && docker compose up -d --build && docker ps"
-            '''
-        }
-    }
-
-    def flaskDBMigrateAndUpgrade() {
-        sshagent(['PRIVATE_KEY_CREDENTIALS_ID']) {
-            sh '''
-            ssh jenkins@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db init'"
-            ssh jenkins@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db migrate'"
-            ssh jenkins@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db upgrade'"
-            '''
         }
     }
 }
