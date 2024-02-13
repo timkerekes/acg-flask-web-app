@@ -11,7 +11,7 @@ def dockerBuildAndPush() {
 
 def createEnvFile() {
     sh '''
-    cd /home/runner/work/acg-flask-web-app/acg-flask-web-app
+    cd /home/jenkins/workspace/acg-flask-web-app_main
     touch .env
     echo "${SERVER_ENV_PROD}" > .env
     '''
