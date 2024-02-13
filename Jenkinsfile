@@ -1,12 +1,9 @@
 def dockerBuildAndPush() {
     withCredentials([usernamePassword(credentialsId: 'HUB_CREDENTIALS_ID', usernameVariable: 'HUB_USERNAME', passwordVariable: 'HUB_PASSWORD')]) {
         script {
-            def registry = 'https://hub.docker.com/repositories/timkerekes'
             def imageName = "${env.HUB_USERNAME}/acg-flask-web-app:${GIT_COMMIT}"
 
-            docker.withRegistry(registry, 'HUB_CREDENTIALS_ID') {
-                docker.build(imageName, '.').push()
-            }
+            docker.build(imageName, '.').push()
         }
     }
 }
