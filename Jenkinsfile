@@ -20,15 +20,15 @@ def createEnvFile() {
 def removeWorkspaceFolder() {
     sshagent(['PRIVATE_KEY_CREDENTIALS_ID']) {
         sh '''
-        ssh jenkins@${HOST} -tt "cd ~ && rm -rf workspace"
+        ssh cloud_user@${HOST} -tt "cd ~ && rm -rf workspace"
         '''
     }
 }
 
 def scpUpload() {
     script {
-        def sourceDir = "/home/runner/work/acg-flask-web-app/acg-flask-web-app"
-        def remoteDir = "~"
+        def sourceDir = "/home/jenkins/workspace/acg-flask-web-app_main"
+        def remoteDir = "~/workspace"
 
         sshPublisher(
             publishers: [sshPublisherDesc(
@@ -46,7 +46,7 @@ def scpUpload() {
 def runDockerComposeUp() {
     sshagent(['PRIVATE_KEY_CREDENTIALS_ID']) {
         sh '''
-        ssh jenkins@${HOST} -tt "cd ~/workspace && docker compose down --remove-orphans && docker compose up -d --build && docker ps"
+        ssh cloud_user@${HOST} -tt "cd ~/workspace && docker compose down --remove-orphans && docker compose up -d --build && docker ps"
         '''
     }
 }
@@ -54,9 +54,9 @@ def runDockerComposeUp() {
 def flaskDBMigrateAndUpgrade() {
     sshagent(['PRIVATE_KEY_CREDENTIALS_ID']) {
         sh '''
-        ssh jenkins@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db init'"
-        ssh jenkins@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db migrate'"
-        ssh jenkins@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db upgrade'"
+        ssh cloud_user@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db init'"
+        ssh cloud_user@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db migrate'"
+        ssh cloud_user@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db upgrade'"
         '''
     }
 }
