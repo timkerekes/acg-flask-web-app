@@ -62,7 +62,7 @@ def flaskDBMigrateAndUpgrade() {
 }
 
 pipeline {
-    agent any
+    agent docker
     stages {
         stage('Build & Push') {
             steps {
