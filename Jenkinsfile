@@ -65,7 +65,7 @@ pipeline {
     agent { label 'docker' }
     
     triggers {
-        githubPush(branch: 'main')
+        githubPush()
     }
     
     stages {
