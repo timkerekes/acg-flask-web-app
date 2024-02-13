@@ -63,6 +63,11 @@ def flaskDBMigrateAndUpgrade() {
 
 pipeline {
     agent { label 'docker' }
+    
+    triggers {
+        githubPush(branch: 'main')
+    }
+    
     stages {
         stage('Build & Push') {
             steps {
