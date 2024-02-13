@@ -3,8 +3,13 @@ name: Docker Build Image CI
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - 'Jenkinsfile'
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - 'Jenkinsfile'
+  
 
 jobs:
 
