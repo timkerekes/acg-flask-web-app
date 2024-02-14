@@ -3,7 +3,7 @@ def dockerBuildAndPush() {
         script {
             def imageName = "${env.HUB_USERNAME}/acg-flask-web-app:${GIT_COMMIT}"
             def latest = "${env.HUB_USERNAME}/acg-flask-web-app:latest"
-            docker.withRegistry('https://registry.hub.docker.com') {
+            docker.withRegistry('https://index.docker.io/v1/') {
                 docker.build(imageName, '.').push()
                 docker.build(latest, '.').push()
             }
