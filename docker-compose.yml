@@ -20,7 +20,7 @@ services:
 
   webapp:
     build: .
-    image: timkerekes/acg-flask-web-app
+    image: timkerekes/acg-flask-web-app:latest
     restart: always
     depends_on: [db]
     environment:

@@ -1,46 +1,46 @@
-def dockerBuildAndPush() {
-    withCredentials([usernamePassword(credentialsId: 'HUB_CREDENTIALS_ID', usernameVariable: 'HUB_USERNAME', passwordVariable: 'HUB_PASSWORD')]) {
-        script {
-            def imageName = "${HUB_USERNAME}/acg-flask-web-app:${GIT_COMMIT}"
-            docker.build(imageName, '.').push('latest')
-        }
-    }
-}
+// def dockerBuildAndPush() {
+//     withCredentials([usernamePassword(credentialsId: 'HUB_CREDENTIALS_ID', usernameVariable: 'HUB_USERNAME', passwordVariable: 'HUB_PASSWORD')]) {
+//         script {
+//             def imageName = "${HUB_USERNAME}/acg-flask-web-app:${GIT_COMMIT}"
+//             docker.build(imageName, '.').push('latest')
+//         }
+//     }
+// }
 
 
-def createEnvFile() {
-    sh '''
-    cd /home/jenkins/workspace/acg-flask-web-app_main
-    touch .env
-    echo "${SERVER_ENV_PROD}" > .env
-    '''
-}
+// def createEnvFile() {
+//     sh '''
+//     cd /home/jenkins/workspace/acg-flask-web-app_main
+//     touch .env
+//     echo "${SERVER_ENV_PROD}" > .env
+//     '''
+// }
 
-def removeWorkspaceFolder() {
-    sshagent(['PRIVATE_KEY_CREDENTIALS_ID']) {
-        sh '''
-        ssh cloud_user@${HOST} -tt "cd ~ && rm -rf workspace"
-        '''
-    }
-}
+// def removeWorkspaceFolder() {
+//     sshagent(['PRIVATE_KEY_CREDENTIALS_ID']) {
+//         sh '''
+//         ssh cloud_user@${HOST} -tt "cd ~ && rm -rf workspace"
+//         '''
+//     }
+// }
 
-def scpUpload() {
-    script {
-        def sourceDir = "/home/jenkins/workspace/acg-flask-web-app_main"
-        def remoteDir = "~/workspace"
+// def scpUpload() {
+//     script {
+//         def sourceDir = "/home/jenkins/workspace/acg-flask-web-app_main"
+//         def remoteDir = "~/workspace"
 
-        sshPublisher(
-            publishers: [sshPublisherDesc(
-                configName: 'SSH_SERVER_CONFIG_NAME',
-                transfers: [sshTransfer(
-                    source: sourceDir,
-                    destination: remoteDir,
-                    removePrefix: sourceDir
-                )]
-            )]
-        )
-    }
-}
+//         sshPublisher(
+//             publishers: [sshPublisherDesc(
+//                 configName: 'SSH_SERVER_CONFIG_NAME',
+//                 transfers: [sshTransfer(
+//                     source: sourceDir,
+//                     destination: remoteDir,
+//                     removePrefix: sourceDir
+//                 )]
+//             )]
+//         )
+//     }
+// }
 
 def runDockerComposeUp() {
     sshagent(['PRIVATE_KEY_CREDENTIALS_ID']) {
@@ -68,17 +68,22 @@ pipeline {
     }
     
     stages {
-        stage('Build & Push') {
+        stage('Build Image') {
             steps {
                 script {
                     def buildSuccessful = false
 
                     try {
                         checkout scm
-                        dockerBuildAndPush()
+                        
+                        withCredentials([usernamePassword(credentialsId: 'HUB_CREDENTIALS_ID', usernameVariable: 'HUB_USERNAME', passwordVariable: 'HUB_PASSWORD')]) {
+                            def imageName = "${HUB_USERNAME}/acg-flask-web-app:${GIT_COMMIT}"
+                            def notes_app = docker.build(imageName, '.')
+                        }
+
                         buildSuccessful = true
                     } catch (Exception e) {
-                        echo "Build and push failed: ${e.getMessage()}"
+                        echo "Build failed: ${e.getMessage()}"
                     }
 
                     // Set environment variable to indicate build status
@@ -87,20 +92,78 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Push Image') {
             when {
                 expression { env.BUILD_SUCCESSFUL == 'true' }
             }
-
             steps {
                 script {
-                    checkout scm
-                    createEnvFile()
-                    removeWorkspaceFolder()
-                    scpUpload()
-                    runDockerComposeUp()
-                    flaskDBMigrateAndUpgrade()
+                    def pushSuccessful = false
+
+                    try{
+                        sh "docker login -u ${HUB_USERNAME} -p ${HUB_PASSWORD}"
+                    } catch (Exception e) {
+                        echo "Docker Login failed: ${e.getMessage()}"
+                    }
+
+                    try {
+                        notes_app.push('latest')
+
+                        pushSuccessful = true
+                    } catch (Exception e) {
+                        echo "Push failed: ${e.getMessage()}"
+                    }
+
+                    env.PUSH_SUCCESSFUL = pushSuccessful.toString()
                 }
+            }
+        }
+
+        stage('Deploy') {
+            agent { label 'app' }
+
+            when {
+                expression { env.PUSH_SUCCESSFUL == 'true' }
+            }
+
+            stages {
+                stage('Git Checkout') {
+                    script {
+                        try {
+                            deleteDir()
+                        } catch (Exception e) {
+                            echo "Delete App Folder Failed: ${e.getMessage()}"
+                        }
+
+                        try {
+                            checkout([$class: 'GitSCM', branches: [[name: '*/main']], relativeTargetDir: '/app'])
+                        } catch (Exception e) {
+                            echo "Checkout Failed: ${e.getMessage()}"
+                        }
+                    }
+                }
+                stage('Create Env File') {
+                    steps {
+                        script {
+                            try {
+                                sh '''
+                                    touch .env
+                                    echo "${SERVER_ENV_PROD}" > .env
+                                '''
+                            } catch (Exception e) {
+                                echo "Create .env failed: ${e.getMessage()}"
+                            }
+                        }
+                    }
+                }
+
+            
+                checkout scm
+                createEnvFile()
+                removeWorkspaceFolder()
+                scpUpload()
+                runDockerComposeUp()
+                flaskDBMigrateAndUpgrade()
             }
         }
     }
