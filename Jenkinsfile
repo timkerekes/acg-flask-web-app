@@ -1,14 +1,10 @@
 def dockerBuildAndPush() {
-    // withCredentials([usernamePassword(credentialsId: 'HUB_CREDENTIALS_ID', usernameVariable: 'HUB_USERNAME', passwordVariable: 'HUB_PASSWORD')]) {
-        // script {
-            // withDockerRegistry('', 'HUB_CREDENTIALS_ID') {
-    def imageName = "timkerekes/acg-flask-web-app:${GIT_COMMIT}"
-    def latest = "timkerekes/acg-flask-web-app:latest"
-    docker.build(imageName, '.').push()
-    docker.build(latest, '.').push()
-            // }
-        // }
-    // }
+    withCredentials([usernamePassword(credentialsId: 'HUB_CREDENTIALS_ID', usernameVariable: 'HUB_USERNAME', passwordVariable: 'HUB_PASSWORD')]) {
+        script {
+            def imageName = "${HUB_USERNAME}/acg-flask-web-app:${GIT_COMMIT}"
+            docker.build(imageName, '.').push('latest')
+        }
+    }
 }
 
 
