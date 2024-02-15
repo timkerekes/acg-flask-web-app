@@ -42,23 +42,23 @@
 //     }
 // }
 
-def runDockerComposeUp() {
-    sshagent(['PRIVATE_KEY_CREDENTIALS_ID']) {
-        sh '''
-        ssh cloud_user@${HOST} -tt "cd ~/workspace && docker compose down --remove-orphans && docker compose up -d --build && docker ps"
-        '''
-    }
-}
+// def runDockerComposeUp() {
+//     sshagent(['PRIVATE_KEY_CREDENTIALS_ID']) {
+//         sh '''
+//         ssh cloud_user@${HOST} -tt "cd ~/workspace && docker compose down --remove-orphans && docker compose up -d --build && docker ps"
+//         '''
+//     }
+// }
 
-def flaskDBMigrateAndUpgrade() {
-    sshagent(['PRIVATE_KEY_CREDENTIALS_ID']) {
-        sh '''
-        ssh cloud_user@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db init'"
-        ssh cloud_user@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db migrate'"
-        ssh cloud_user@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db upgrade'"
-        '''
-    }
-}
+// def flaskDBMigrateAndUpgrade() {
+//     sshagent(['PRIVATE_KEY_CREDENTIALS_ID']) {
+//         sh '''
+//         ssh cloud_user@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db init'"
+//         ssh cloud_user@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db migrate'"
+//         ssh cloud_user@${HOST} -tt "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db upgrade'"
+//         '''
+//     }
+// }
 
 pipeline {
     agent { label 'docker' }
@@ -74,6 +74,7 @@ pipeline {
                     def buildSuccessful = false
 
                     try {
+                        deleteDir()
                         checkout scm
                         
                         withCredentials([usernamePassword(credentialsId: 'HUB_CREDENTIALS_ID', usernameVariable: 'HUB_USERNAME', passwordVariable: 'HUB_PASSWORD')]) {
@@ -86,7 +87,6 @@ pipeline {
                         echo "Build failed: ${e.getMessage()}"
                     }
 
-                    // Set environment variable to indicate build status
                     env.BUILD_SUCCESSFUL = buildSuccessful.toString()
                 }
             }
@@ -123,47 +123,67 @@ pipeline {
             agent { label 'app' }
 
             when {
-                expression { env.PUSH_SUCCESSFUL == 'true' }
+                expression { env.BUILD_SUCCESSFUL == 'true' && env.PUSH_SUCCESSFUL == 'true' }
             }
 
             stages {
                 stage('Git Checkout') {
-                    script {
-                        try {
-                            deleteDir()
-                        } catch (Exception e) {
-                            echo "Delete App Folder Failed: ${e.getMessage()}"
-                        }
+                    steps {
+                        script {
+                            // try {
+                                deleteDir()
+                            // } catch (Exception e) {
+                            //     echo "Delete App Folder Failed: ${e.getMessage()}"
+                            // }
 
-                        try {
-                            checkout([$class: 'GitSCM', branches: [[name: '*/main']], relativeTargetDir: '/app'])
-                        } catch (Exception e) {
-                            echo "Checkout Failed: ${e.getMessage()}"
+                            // try {
+                                checkout([$class: 'GitSCM', branches: [[name: '*/main']], relativeTargetDir: '/app'])
+                            // } catch (Exception e) {
+                            //     echo "Checkout Failed: ${e.getMessage()}"
+                            // }
                         }
+                        
                     }
+                    
                 }
                 stage('Create Env File') {
                     steps {
                         script {
-                            try {
-                                sh '''
-                                    touch .env
-                                    echo "${SERVER_ENV_PROD}" > .env
-                                '''
-                            } catch (Exception e) {
-                                echo "Create .env failed: ${e.getMessage()}"
+                            // try {
+                                dir('/app') {
+                                    sh '''
+                                        touch .env
+                                        echo "${SERVER_ENV_PROD}" > .env
+                                    '''
+                                }
+                            // } catch (Exception e) {
+                            //     echo "Create .env failed: ${e.getMessage()}"
+                            // }
+                        }
+                    }
+                }
+                stage('Docker Compose Up') {
+                    steps {
+                        script {
+                            dir('/app') {
+                                sh "docker compose down --remove-orphans && docker compose up -d --build && docker ps"
                             }
                         }
                     }
                 }
-
-            
-                checkout scm
-                createEnvFile()
-                removeWorkspaceFolder()
-                scpUpload()
-                runDockerComposeUp()
-                flaskDBMigrateAndUpgrade()
+                stage('Flask DB Migrate & Upgrade') {
+                    steps {
+                        script {
+                            dir('/app') {
+                                sh ```
+                                    "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db init'"
+                                    "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db migrate'"
+                                    "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db upgrade'"
+                                ```
+                            }
+                        }
+                    }
+                }
             }
         }
     }
