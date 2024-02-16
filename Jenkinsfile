@@ -101,7 +101,9 @@ pipeline {
                     def pushSuccessful = false
 
                     try{
-                        sh "docker login -u ${HUB_USERNAME} -p ${HUB_PASSWORD}"
+                        withCredentials([usernamePassword(credentialsId: 'HUB_CREDENTIALS_ID', usernameVariable: 'HUB_USERNAME', passwordVariable: 'HUB_PASSWORD')]) {
+                            sh "docker login -u ${HUB_USERNAME} -p ${HUB_PASSWORD}"
+                        }
                     } catch (Exception e) {
                         echo "Docker Login failed: ${e.getMessage()}"
                     }
