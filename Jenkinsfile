@@ -163,7 +163,7 @@ pipeline {
                         script {
                             withCredentials([file(credentialsId: 'SERVER_ENV_PROD', variable: 'ENV_PROD')]) {
                                 // Decode the Base64-encoded content
-                                def decodedContent = sh(script: "echo \$ENV_PROD | base64 --decode", returnStdout: true).trim()
+                                def decodedContent = sh(script: "echo \${ENV_PROD} | base64 --decode", returnStdout: true).trim()
                                 // Write the decoded content to the .env file
                                 echo decodedContent > ENV_FILE
                             }
