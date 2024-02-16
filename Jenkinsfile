@@ -79,7 +79,7 @@ pipeline {
                         
                         withCredentials([usernamePassword(credentialsId: 'HUB_CREDENTIALS_ID', usernameVariable: 'HUB_USERNAME', passwordVariable: 'HUB_PASSWORD')]) {
                             def imageName = "${HUB_USERNAME}/acg-flask-web-app:${GIT_COMMIT}"
-                            def notes_app = docker.build(imageName, '.')
+                            env.NOTES_APP = docker.build(imageName, '.')
                         }
 
                         buildSuccessful = true
@@ -109,7 +109,7 @@ pipeline {
                     }
 
                     try {
-                        notes_app.push('latest')
+                        NOTES_APP.push('latest')
 
                         pushSuccessful = true
                     } catch (Exception e) {
