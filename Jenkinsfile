@@ -129,38 +129,39 @@ pipeline {
             }
 
             stages {
-                stage('Git Checkout') {
-                    steps {
-                        script {
-                            sh "mkdir ~/app"
-                            
-                            dir('app') {
-                            // try {
-                                deleteDir()
-                            // } catch (Exception e) {
-                            //     echo "Delete App Folder Failed: ${e.getMessage()}"
-                            // }
+                // stage('Git Checkout') {
+                //     steps {
+                //         script {
+                //             sh "mkdir ~/app"
 
-                            // try {
-                                checkout scm
-                            // } catch (Exception e) {
-                            //     echo "Checkout Failed: ${e.getMessage()}"
-                            // }
+                //             dir('app') {
+                //             // try {
+                //                 deleteDir()
+                //             // } catch (Exception e) {
+                //             //     echo "Delete App Folder Failed: ${e.getMessage()}"
+                //             // }
 
-                            }
-                        }
+                //             // try {
+                //                 checkout scm
+                //             // } catch (Exception e) {
+                //             //     echo "Checkout Failed: ${e.getMessage()}"
+                //             // }
+
+                //             }
+                //         }
                         
-                    }
+                //     }
                     
-                }
+                // }
                 stage('Create Env File') {
                     steps {
                         script {
                             // try {
-                                dir('/app') {
-                                    sh "touch .env"
-                                    sh "echo "${SERVER_ENV_PROD}" > .env"
-                                }
+                                // dir('/app') {
+                                sh "cd acg-flask-web-app_${BRANCH_NAME}"
+                                sh "touch .env"
+                                sh "echo "${SERVER_ENV_PROD}" > .env"
+                                // }
                             // } catch (Exception e) {
                             //     echo "Create .env failed: ${e.getMessage()}"
                             // }
@@ -170,7 +171,7 @@ pipeline {
                 stage('Docker Compose Up') {
                     steps {
                         script {
-                            dir('/app') {
+                            dir("acg-flask-web-app_${BRANCH_NAME}") {
                                 sh "docker compose down --remove-orphans && docker compose up -d --build && docker ps"
                             }
                         }
@@ -179,7 +180,7 @@ pipeline {
                 stage('Flask DB Migrate & Upgrade') {
                     steps {
                         script {
-                            dir('/app') {
+                            dir("acg-flask-web-app_${BRANCH_NAME}") {
                                 sh "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db init'"
                                 sh "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db migrate'"
                                 sh "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db upgrade'"
