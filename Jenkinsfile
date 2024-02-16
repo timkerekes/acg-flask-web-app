@@ -128,6 +128,11 @@ pipeline {
                 expression { env.BUILD_SUCCESSFUL == 'true' && env.PUSH_SUCCESSFUL == 'true' }
             }
 
+            environment {
+                ENV_FILE = '.env'
+                CONTAINER_NAME = 'workspace-webapp-1'
+            }
+
             stages {
                 // stage('Git Checkout') {
                 //     steps {
@@ -156,24 +161,19 @@ pipeline {
                 stage('Create Env File') {
                     steps {
                         script {
-                            // try {
-                                // dir('/app') {
-                                // sh "cd acg-flask-web-app_${BRANCH_NAME}"
-                                sh "touch .env"
-                                sh "echo '${SERVER_ENV_PROD}' > .env"
-                                // }
-                            // } catch (Exception e) {
-                            //     echo "Create .env failed: ${e.getMessage()}"
-                            // }
+                            withCredentials([file(credentialsId: 'SERVER_ENV_PROD', variable: 'ENV_PROD')]) {
+                                // Decode the Base64-encoded content
+                                def decodedContent = sh(script: "echo \$ENV_PROD | base64 --decode", returnStdout: true).trim()
+                                // Write the decoded content to the .env file
+                                echo decodedContent > ENV_FILE
+                            }
                         }
                     }
                 }
                 stage('Docker Compose Up') {
                     steps {
                         script {
-                            // dir("acg-flask-web-app_${BRANCH_NAME}") {
-                                sh "docker compose down --remove-orphans && docker compose up -d --build && docker ps"
-                            // }
+                            sh "docker compose down --remove-orphans && docker compose up -d --build && docker ps"
                         }
                     }
                 }
@@ -181,9 +181,9 @@ pipeline {
                     steps {
                         script {
                             // dir("acg-flask-web-app_${BRANCH_NAME}") {
-                                sh "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db init'"
-                                sh "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db migrate'"
-                                sh "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db upgrade'"
+                                sh "docker exec -w /app/notes ${CONTAINER_NAME} /bin/sh -c 'flask db init'"
+                                sh "docker exec -w /app/notes ${CONTAINER_NAME} /bin/sh -c 'flask db migrate'"
+                                sh "docker exec -w /app/notes ${CONTAINER_NAME} /bin/sh -c 'flask db upgrade'"
                             // }
                         }
                     }
