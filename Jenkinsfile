@@ -139,7 +139,7 @@ pipeline {
                             // }
 
                             // try {
-                                checkout([$class: 'GitSCM', branches: [[name: '*/main']], relativeTargetDir: '~/app'])
+                                checkout([$class: 'GitSCM', relativeTargetDir: '/app'])
                             // } catch (Exception e) {
                             //     echo "Checkout Failed: ${e.getMessage()}"
                             // }
