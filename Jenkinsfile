@@ -158,7 +158,7 @@ pipeline {
                         script {
                             // try {
                                 // dir('/app') {
-                                sh "cd acg-flask-web-app_${BRANCH_NAME}"
+                                // sh "cd acg-flask-web-app_${BRANCH_NAME}"
                                 sh "touch .env"
                                 sh "echo "${SERVER_ENV_PROD}" > .env"
                                 // }
@@ -171,20 +171,20 @@ pipeline {
                 stage('Docker Compose Up') {
                     steps {
                         script {
-                            dir("acg-flask-web-app_${BRANCH_NAME}") {
+                            // dir("acg-flask-web-app_${BRANCH_NAME}") {
                                 sh "docker compose down --remove-orphans && docker compose up -d --build && docker ps"
-                            }
+                            // }
                         }
                     }
                 }
                 stage('Flask DB Migrate & Upgrade') {
                     steps {
                         script {
-                            dir("acg-flask-web-app_${BRANCH_NAME}") {
+                            // dir("acg-flask-web-app_${BRANCH_NAME}") {
                                 sh "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db init'"
                                 sh "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db migrate'"
                                 sh "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db upgrade'"
-                            }
+                            // }
                         }
                     }
                 }
