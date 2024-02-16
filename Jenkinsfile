@@ -151,10 +151,8 @@ pipeline {
                         script {
                             // try {
                                 dir('/app') {
-                                    sh '''
-                                        touch .env
-                                        echo "${SERVER_ENV_PROD}" > .env
-                                    '''
+                                    sh "touch .env"
+                                    sh "echo "${SERVER_ENV_PROD}" > .env"
                                 }
                             // } catch (Exception e) {
                             //     echo "Create .env failed: ${e.getMessage()}"
@@ -175,11 +173,9 @@ pipeline {
                     steps {
                         script {
                             dir('/app') {
-                                sh ```
-                                    "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db init'"
-                                    "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db migrate'"
-                                    "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db upgrade'"
-                                ```
+                                sh "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db init'"
+                                sh "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db migrate'"
+                                sh "docker exec -w /app/notes workspace-webapp-1 /bin/sh -c 'flask db upgrade'"
                             }
                         }
                     }
