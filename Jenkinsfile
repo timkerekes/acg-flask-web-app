@@ -160,7 +160,7 @@ pipeline {
                                 // dir('/app') {
                                 // sh "cd acg-flask-web-app_${BRANCH_NAME}"
                                 sh "touch .env"
-                                sh "echo "${SERVER_ENV_PROD}" > .env"
+                                sh "echo '${SERVER_ENV_PROD}' > .env"
                                 // }
                             // } catch (Exception e) {
                             //     echo "Create .env failed: ${e.getMessage()}"
