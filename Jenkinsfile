@@ -100,13 +100,13 @@ pipeline {
                 script {
                     def pushSuccessful = false
 
-                    try{
-                        withCredentials([usernamePassword(credentialsId: 'HUB_CREDENTIALS_ID', usernameVariable: 'HUB_USERNAME', passwordVariable: 'HUB_PASSWORD')]) {
-                            sh "docker login -u ${HUB_USERNAME} -p ${HUB_PASSWORD}"
-                        }
-                    } catch (Exception e) {
-                        echo "Docker Login failed: ${e.getMessage()}"
-                    }
+                    // try{
+                    //     withCredentials([usernamePassword(credentialsId: 'HUB_CREDENTIALS_ID', usernameVariable: 'HUB_USERNAME', passwordVariable: 'HUB_PASSWORD')]) {
+                    //         sh "docker login -u ${HUB_USERNAME} -p ${HUB_PASSWORD}"
+                    //     }
+                    // } catch (Exception e) {
+                    //     echo "Docker Login failed: ${e.getMessage()}"
+                    // }
 
                     try {
                         dockerImage.push('latest')
@@ -139,7 +139,7 @@ pipeline {
                             // }
 
                             // try {
-                                checkout([$class: 'GitSCM', branches: [[name: '*/main']], relativeTargetDir: '/app'])
+                                checkout([$class: 'GitSCM', branches: [[name: '*/main']], relativeTargetDir: '~/app'])
                             // } catch (Exception e) {
                             //     echo "Checkout Failed: ${e.getMessage()}"
                             // }
