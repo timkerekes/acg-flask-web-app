@@ -132,6 +132,9 @@ pipeline {
                 stage('Git Checkout') {
                     steps {
                         script {
+                            sh "mkdir ~/app"
+                            
+                            dir('app') {
                             // try {
                                 deleteDir()
                             // } catch (Exception e) {
@@ -139,10 +142,12 @@ pipeline {
                             // }
 
                             // try {
-                                checkout([$class: 'GitSCM', relativeTargetDir: '/app'])
+                                checkout scm
                             // } catch (Exception e) {
                             //     echo "Checkout Failed: ${e.getMessage()}"
                             // }
+
+                            }
                         }
                         
                     }
