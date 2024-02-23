@@ -155,7 +155,6 @@ pipeline {
                     steps {
                         script {
                                 sh "echo ${ENV_PROD} > ENV_FILE"
-                            }
                         }
                     }
                 }
