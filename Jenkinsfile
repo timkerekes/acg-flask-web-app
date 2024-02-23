@@ -140,8 +140,6 @@ pipeline {
                             } catch (Exception e) {
                                 echo "Checkout Failed: ${e.getMessage()}"
                             }
-
-                            }
                         }
                         
                     }
