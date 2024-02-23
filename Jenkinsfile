@@ -122,7 +122,7 @@ pipeline {
 
             environment {
                 ENV_PROD = credentials('SERVER_ENV_PROD')
-                CONTAINER_NAME = 'workspace-webapp-1'
+                CONTAINER_NAME = 'notes_app-webapp-1'
             }
 
             stages {
@@ -157,7 +157,7 @@ pipeline {
                 stage('Docker Compose Up') {
                     steps {
                         script {
-                            sh "docker compose down --remove-orphans && docker compose up -d --build && docker ps"
+                            sh "docker compose down --remove-orphans && docker compose up -d && docker ps"
                         }
                     }
                 }
