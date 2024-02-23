@@ -122,7 +122,6 @@ pipeline {
 
             environment {
                 ENV_PROD = credentials('SERVER_ENV_PROD')
-                ENV_FILE = '.env'
                 CONTAINER_NAME = 'workspace-webapp-1'
             }
 
@@ -142,14 +141,16 @@ pipeline {
                                 echo "Checkout Failed: ${e.getMessage()}"
                             }
 
+                            }
                         }
-                    }
                         
+                    }
+                    
                 }
                 stage('Create Env File') {
                     steps {
                         script {
-                            sh "echo $ENV_PROD > $ENV_FILE"
+                            sh('echo $ENV_PROD > .env')
                         }
                     }
                 }
