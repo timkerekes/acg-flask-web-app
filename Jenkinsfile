@@ -154,7 +154,7 @@ pipeline {
                 stage('Create Env File') {
                     steps {
                         script {
-                                sh "echo ${ENV_PROD} > ENV_FILE"
+                                sh "echo ${ENV_PROD} > ${ENV_FILE}"
                         }
                     }
                 }
