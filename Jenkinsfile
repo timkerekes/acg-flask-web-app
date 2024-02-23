@@ -129,6 +129,7 @@ pipeline {
             }
 
             environment {
+                ENV_PROD = credentials('SERVER_ENV_PROD')
                 ENV_FILE = '.env'
                 CONTAINER_NAME = 'workspace-webapp-1'
             }
@@ -161,11 +162,7 @@ pipeline {
                 stage('Create Env File') {
                     steps {
                         script {
-                            withCredentials([file(credentialsId: 'SERVER_ENV_PROD', variable: 'ENV_PROD')]) {
-                                // Decode the Base64-encoded content
-                                def decodedContent = sh(script: "echo \${ENV_PROD} | base64 --decode", returnStdout: true).trim()
-                                // Write the decoded content to the .env file
-                                echo decodedContent > ENV_FILE
+                                sh "echo ${ENV_PROD} > ENV_FILE"
                             }
                         }
                     }
