@@ -127,34 +127,29 @@ pipeline {
             }
 
             stages {
-                // stage('Git Checkout') {
-                //     steps {
-                //         script {
-                //             sh "mkdir ~/app"
+                stage('Git Checkout') {
+                    steps {
+                        script {
+                            try {
+                                deleteDir()
+                            } catch (Exception e) {
+                                echo "Delete App Folder Failed: ${e.getMessage()}"
+                            }
 
-                //             dir('app') {
-                //             // try {
-                //                 deleteDir()
-                //             // } catch (Exception e) {
-                //             //     echo "Delete App Folder Failed: ${e.getMessage()}"
-                //             // }
+                            try {
+                                checkout scm
+                            } catch (Exception e) {
+                                echo "Checkout Failed: ${e.getMessage()}"
+                            }
 
-                //             // try {
-                //                 checkout scm
-                //             // } catch (Exception e) {
-                //             //     echo "Checkout Failed: ${e.getMessage()}"
-                //             // }
-
-                //             }
-                //         }
+                        }
+                    }
                         
-                //     }
-                    
-                // }
+                }
                 stage('Create Env File') {
                     steps {
                         script {
-                                sh "echo ${ENV_PROD} > ${ENV_FILE}"
+                            sh "echo $ENV_PROD > $ENV_FILE"
                         }
                     }
                 }
