@@ -102,21 +102,20 @@ pipeline {
                 stage('Flask DB Migrate & Upgrade') {
                     steps {
                         script {
-                            try{
+                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                                 sh "docker exec -w /app/notes ${CONTAINER_NAME} /bin/sh -c 'flask db init'"
-                            } catch (Exception e) {
-                                echo "Flask db init failed: ${e.getMessage()}"
-                                continue
+                            } onFailure {
+                                echo "Flask db init failed: ${error}"
                             }
-                            try{
+                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                                 sh "docker exec -w /app/notes ${CONTAINER_NAME} /bin/sh -c 'flask db migrate'"
-                            } catch (Exception e) {
-                                echo "Flask db migrate failed: ${e.getMessage()}"
+                            } onFailure {
+                                echo "Flask db migrate failed: ${error}"
                             }
-                            try{
+                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                                 sh "docker exec -w /app/notes ${CONTAINER_NAME} /bin/sh -c 'flask db upgrade'"
-                            } catch (Exception e) {
-                                echo "Flask db upgrade failed: ${e.getMessage()}"
+                            } onFailure {
+                                echo "Flask db upgrade failed: ${error}"
                             }
                         }
                     }
