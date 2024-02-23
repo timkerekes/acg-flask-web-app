@@ -148,7 +148,9 @@ pipeline {
                 stage('Create Env File') {
                     steps {
                         script {
-                            sh('echo $ENV_PROD > .env')
+                            def envFile = readFile env.ENV_PROD
+
+                            writeFile file: '.env', text: envFile
                         }
                     }
                 }
