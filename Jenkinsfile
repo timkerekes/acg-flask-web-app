@@ -9,7 +9,6 @@ pipeline {
         stage('Build Image') {
             environment {
                         ENV_PROD = credentials('SERVER_ENV_PROD')
-                        CONTAINER_NAME = 'notes_app-webapp-1'
             }
 
             stages {
@@ -17,6 +16,9 @@ pipeline {
 
                     steps {
                         script {
+                            deleteDir()
+                            checkout scm
+
                             def envFile = readFile env.ENV_PROD
 
                             writeFile file: '.env', text: envFile
@@ -30,9 +32,6 @@ pipeline {
                             def buildSuccessful = false
 
                             try {
-                                deleteDir()
-                                checkout scm
-                                
                                 withCredentials([usernamePassword(credentialsId: 'HUB_CREDENTIALS_ID', usernameVariable: 'HUB_USERNAME', passwordVariable: 'HUB_PASSWORD')]) {
                                     def imageName = "${HUB_USERNAME}/acg-flask-web-app:${GIT_COMMIT}"
                                     dockerImage = docker.build(imageName, '.')
