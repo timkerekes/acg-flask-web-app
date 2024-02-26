@@ -86,6 +86,8 @@ pipeline {
                 stage('Clean Docker Env') {
                     steps {
                         script {
+                            sh "docker compose down --remove-orphans"
+
                             try {
                                 sh 'docker rm -vf $(docker ps -aq)'
                             } catch (Exception e) {
@@ -130,27 +132,27 @@ pipeline {
                 stage('Docker Compose Up') {
                     steps {
                         script {
-                            sh "docker compose down --remove-orphans && docker compose up -d && docker ps"
+                            sh "docker compose up -d && docker ps"
                         }
                     }
                 }
                 stage('Flask DB Migrate & Upgrade') {
                     steps {
                         script {
-                            catchError(buildResult: 'SUCCESS') {
+                            try {
                                 sh "docker exec -w /app/notes ${CONTAINER_NAME} /bin/sh -c 'flask db init'"
-                            } onFailure {
-                                echo "Flask db init failed: ${error}"
+                            } catch (Exception e) {
+                                echo "Flask db init failed: ${e.getMessage()}"
                             }
-                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                            try {
                                 sh "docker exec -w /app/notes ${CONTAINER_NAME} /bin/sh -c 'flask db migrate'"
-                            } onFailure {
-                                echo "Flask db migrate failed: ${error}"
+                            } catch (Exception e) {
+                                echo "Flask db migrate failed: ${e.getMessage()}"
                             }
-                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                            try {
                                 sh "docker exec -w /app/notes ${CONTAINER_NAME} /bin/sh -c 'flask db upgrade'"
-                            } onFailure {
-                                echo "Flask db upgrade failed: ${error}"
+                            } catch (Exception e) {
+                                echo "Flask db upgrade failed: ${e.getMessage()}"
                             }
                         }
                     }
