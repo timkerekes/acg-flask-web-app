@@ -1,19 +1,25 @@
 pipeline {
     agent { label 'docker' }
     
+    environment {
+        ENV_PROD = credentials('SERVER_ENV_PROD')
+    }
+
     triggers {
         githubPush()
     }
     
     stages {
-        stage('Build Image') {
-            environment {
-                        ENV_PROD = credentials('SERVER_ENV_PROD')
+        stage('Test Container Name') {
+            steps {
+                script {
+                    sh "echo ${env.JOB_NAME}"
+                }
             }
-
+        }
+        stage('Build Image') {
             stages {
                 stage('Create Env File') {
-
                     steps {
                         script {
                             deleteDir()
@@ -78,7 +84,6 @@ pipeline {
             }
 
             environment {
-                ENV_PROD = credentials('SERVER_ENV_PROD')
                 CONTAINER_NAME = 'notes_app-webapp-1'
             }
 
@@ -86,35 +91,18 @@ pipeline {
                 stage('Clean Docker Env') {
                     steps {
                         script {
-                            sh "docker compose down --remove-orphans"
+                            sh "docker compose down -v --remove-orphans"
 
-                            try {
-                                sh 'docker rm -vf $(docker ps -aq)'
-                            } catch (Exception e) {
-                                echo "Delete docker containers & volumes Failed: ${e.getMessage()}"
-                            }
-                            try {
-                                sh 'docker rmi -f $(docker images -aq)'
-                            } catch (Exception e) {
-                                echo "Delete docker images Failed: ${e.getMessage()}"
-                            }
+                            sh 'docker system prune -a --volumes'
+                            
                         }
                     }
                 }
                 stage('Git Checkout') {
                     steps {
                         script {
-                            try {
-                                deleteDir()
-                            } catch (Exception e) {
-                                echo "Delete App Folder Failed: ${e.getMessage()}"
-                            }
-
-                            try {
-                                checkout scm
-                            } catch (Exception e) {
-                                echo "Checkout Failed: ${e.getMessage()}"
-                            }
+                            deleteDir()
+                            checkout scm
                         }
                         
                     }
@@ -139,21 +127,11 @@ pipeline {
                 stage('Flask DB Migrate & Upgrade') {
                     steps {
                         script {
-                            try {
-                                sh "docker exec -w /app/notes ${CONTAINER_NAME} /bin/sh -c 'flask db init'"
-                            } catch (Exception e) {
-                                echo "Flask db init failed: ${e.getMessage()}"
-                            }
-                            try {
-                                sh "docker exec -w /app/notes ${CONTAINER_NAME} /bin/sh -c 'flask db migrate'"
-                            } catch (Exception e) {
-                                echo "Flask db migrate failed: ${e.getMessage()}"
-                            }
-                            try {
-                                sh "docker exec -w /app/notes ${CONTAINER_NAME} /bin/sh -c 'flask db upgrade'"
-                            } catch (Exception e) {
-                                echo "Flask db upgrade failed: ${e.getMessage()}"
-                            }
+                            sh "docker exec -w /app/notes ${CONTAINER_NAME} /bin/sh -c 'flask db init'"
+                            
+                            sh "docker exec -w /app/notes ${CONTAINER_NAME} /bin/sh -c 'flask db migrate'"
+                            
+                            sh "docker exec -w /app/notes ${CONTAINER_NAME} /bin/sh -c 'flask db upgrade'"
                         }
                     }
                 }
