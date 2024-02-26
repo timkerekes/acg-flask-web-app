@@ -102,7 +102,7 @@ pipeline {
                 stage('Flask DB Migrate & Upgrade') {
                     steps {
                         script {
-                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                            catchError(buildResult: 'SUCCESS') {
                                 sh "docker exec -w /app/notes ${CONTAINER_NAME} /bin/sh -c 'flask db init'"
                             } onFailure {
                                 echo "Flask db init failed: ${error}"
