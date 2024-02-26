@@ -83,6 +83,22 @@ pipeline {
             }
 
             stages {
+                stage('Clean Docker Env') {
+                    steps {
+                        script {
+                            try {
+                                docker rm -vf $(docker ps -aq)
+                            } catch (Exception e) {
+                                echo "Delete docker containers & volumes Failed: ${e.getMessage()}"
+                            }
+                            try {
+                                docker rmi -f $(docker images -aq)
+                            } catch (Exception e) {
+                                echo "Delete docker images Failed: ${e.getMessage()}"
+                            }
+                        }
+                    }
+                }
                 stage('Git Checkout') {
                     steps {
                         script {
