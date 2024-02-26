@@ -87,12 +87,12 @@ pipeline {
                     steps {
                         script {
                             try {
-                                docker rm -vf $(docker ps -aq)
+                                sh "docker rm -vf $(docker ps -aq)"
                             } catch (Exception e) {
                                 echo "Delete docker containers & volumes Failed: ${e.getMessage()}"
                             }
                             try {
-                                docker rmi -f $(docker images -aq)
+                                sh "docker rmi -f $(docker images -aq)"
                             } catch (Exception e) {
                                 echo "Delete docker images Failed: ${e.getMessage()}"
                             }
