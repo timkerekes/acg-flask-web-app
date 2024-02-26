@@ -7,25 +7,45 @@ pipeline {
     
     stages {
         stage('Build Image') {
-            steps {
-                script {
-                    def buildSuccessful = false
+            environment {
+                        ENV_PROD = credentials('SERVER_ENV_PROD')
+                        CONTAINER_NAME = 'notes_app-webapp-1'
+            }
 
-                    try {
-                        deleteDir()
-                        checkout scm
-                        
-                        withCredentials([usernamePassword(credentialsId: 'HUB_CREDENTIALS_ID', usernameVariable: 'HUB_USERNAME', passwordVariable: 'HUB_PASSWORD')]) {
-                            def imageName = "${HUB_USERNAME}/acg-flask-web-app:${GIT_COMMIT}"
-                            dockerImage = docker.build(imageName, '.')
+            stages {
+                stage('Create Env File') {
+
+                    steps {
+                        script {
+                            def envFile = readFile env.ENV_PROD
+
+                            writeFile file: '.env', text: envFile
                         }
-
-                        buildSuccessful = true
-                    } catch (Exception e) {
-                        echo "Build failed: ${e.getMessage()}"
                     }
+                }
 
-                    env.BUILD_SUCCESSFUL = buildSuccessful.toString()
+                stage('Docker Build') {
+                    steps {
+                        script {
+                            def buildSuccessful = false
+
+                            try {
+                                deleteDir()
+                                checkout scm
+                                
+                                withCredentials([usernamePassword(credentialsId: 'HUB_CREDENTIALS_ID', usernameVariable: 'HUB_USERNAME', passwordVariable: 'HUB_PASSWORD')]) {
+                                    def imageName = "${HUB_USERNAME}/acg-flask-web-app:${GIT_COMMIT}"
+                                    dockerImage = docker.build(imageName, '.')
+                                }
+
+                                buildSuccessful = true
+                            } catch (Exception e) {
+                                echo "Build failed: ${e.getMessage()}"
+                            }
+
+                            env.BUILD_SUCCESSFUL = buildSuccessful.toString()
+                        }
+                    }
                 }
             }
         }
